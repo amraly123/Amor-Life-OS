@@ -8,9 +8,32 @@ export interface BackendConfig {
   enabled: boolean;
 }
 
+// ===== DEFAULT CONFIG (Always-on sync) =====
+// These are the hardcoded defaults. The app will ALWAYS try to sync
+// to the academy backend, regardless of domain or browser.
+// User can still override these from the Settings page.
+const DEFAULT_CONFIG: BackendConfig = {
+  baseUrl: 'https://quranmindmap.com/api/amor/sync',
+  token: 'amor_secret_123',
+  userId: 'amr_admin',
+  enabled: true,
+};
+// ============================================
+
 export function getBackendConfig(): BackendConfig {
   const saved = localStorage.getItem('amor_backend_config');
-  return saved ? JSON.parse(saved) : { baseUrl: '', token: '', userId: 'amr_admin', enabled: false };
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    // Merge with defaults: if user hasn't configured something, use default
+    return {
+      baseUrl: parsed.baseUrl || DEFAULT_CONFIG.baseUrl,
+      token: parsed.token || DEFAULT_CONFIG.token,
+      userId: parsed.userId || DEFAULT_CONFIG.userId,
+      // If user explicitly disabled, respect that. Otherwise default to enabled.
+      enabled: parsed.enabled !== undefined ? parsed.enabled : DEFAULT_CONFIG.enabled,
+    };
+  }
+  return DEFAULT_CONFIG;
 }
 
 export function saveBackendConfig(config: BackendConfig) {
