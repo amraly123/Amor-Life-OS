@@ -8,6 +8,7 @@ import TaskManager from './components/TaskManager';
 import AIAssistant from './components/AIAssistant';
 import SmartPlanner from './components/SmartPlanner';
 import Settings from './components/Settings';
+import LoginGate from './components/LoginGate';
 import { syncDataToHostinger, fetchDataFromHostinger, getBackendConfig } from './syncService';
 import { INITIAL_GOALS, INITIAL_TASKS } from './constants';
 import { UserState, Goal, Task } from './types';
@@ -15,7 +16,10 @@ import { UserState, Goal, Task } from './types';
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return sessionStorage.getItem('amor_authenticated') === 'true';
+  });
+
   const [userStats, setUserStats] = useState<UserState>(() => {
     const saved = localStorage.getItem('amor_user_stats');
     return saved ? JSON.parse(saved) : {
@@ -83,8 +87,26 @@ const App: React.FC = () => {
     }
   };
 
+  if (!isAuthenticated) {
+    return <LoginGate onLogin={() => {
+      setIsAuthenticated(true);
+      sessionStorage.setItem('amor_authenticated', 'true');
+    }} />;
+  }
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    sessionStorage.removeItem('amor_authenticated');
+  };
+
   return (
-    <Layout activeTab={activeTab} setActiveTab={setActiveTab} userStats={userStats} onSync={handleManualSync}>
+    <Layout
+      activeTab={activeTab}
+      setActiveTab={setActiveTab}
+      userStats={userStats}
+      onSync={handleManualSync}
+      onLogout={handleLogout}
+    >
       {renderContent()}
     </Layout>
   );
