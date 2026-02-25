@@ -1,0 +1,8 @@
+{
+  "name": "Amor Life OS",
+  "description": "A high-end, personalized Personal Life Operating System for Egyptian entrepreneurs, featuring strategic planning, gamified productivity, and AI-driven strategy.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
