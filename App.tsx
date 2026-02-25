@@ -77,7 +77,7 @@ const App: React.FC = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard': return <Dashboard userStats={userStats} />;
-      case 'goals': return <GoalTracker goals={goals} />;
+      case 'goals': return <GoalTracker goals={goals} setGoals={setGoals} />;
       case 'tasks': return <TaskManager tasks={tasks} setTasks={setTasks} goals={goals} />;
       case 'matrix': return <PriorityMatrix tasks={tasks} setTasks={setTasks} />;
       case 'ai': return <AIAssistant goals={goals} tasks={tasks} userStats={userStats} />;
