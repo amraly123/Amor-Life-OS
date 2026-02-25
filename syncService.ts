@@ -4,12 +4,13 @@ import { Goal, Task, UserState } from './types';
 export interface BackendConfig {
   baseUrl: string;
   token: string;
+  userId: string;
   enabled: boolean;
 }
 
 export function getBackendConfig(): BackendConfig {
   const saved = localStorage.getItem('amor_backend_config');
-  return saved ? JSON.parse(saved) : { baseUrl: '', token: '', enabled: false };
+  return saved ? JSON.parse(saved) : { baseUrl: '', token: '', userId: 'amr_admin', enabled: false };
 }
 
 export function saveBackendConfig(config: BackendConfig) {
@@ -25,14 +26,17 @@ export async function syncDataToHostinger(data: { goals: Goal[], tasks: Task[], 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${config.token}`
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify({
+        token: config.token,
+        userId: config.userId,
+        content: data
+      })
     });
-    
+
     const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'سيرفر هوستنجر لم يستجب');
-    return result;
+    if (!response.ok) throw new Error(result.error || 'سيرفر الأكاديمية لم يستجب');
+    return { status: 'success', message: result.message, timestamp: result.timestamp };
   } catch (error) {
     console.error('Sync Error:', error);
     return { status: 'error', message: error instanceof Error ? error.message : 'خطأ في الاتصال بالسيرفر' };
@@ -44,7 +48,7 @@ export async function fetchDataFromHostinger() {
   if (!config.enabled || !config.baseUrl) return null;
 
   try {
-    const response = await fetch(`${config.baseUrl}?token=${config.token}`);
+    const response = await fetch(`${config.baseUrl}?token=${config.token}&userId=${config.userId}`);
     if (!response.ok) throw new Error('تعذر جلب البيانات من السيرفر');
     const data = await response.json();
     return data;
