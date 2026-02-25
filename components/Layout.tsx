@@ -28,7 +28,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, user
       {/* Sidebar */}
       <aside className="w-full md:w-64 bg-slate-900 text-white p-6 flex flex-col shadow-xl z-10">
         <div className="mb-10 text-center">
-          <h1 className="text-2xl font-bold tracking-tight text-emerald-400">AMOR OS</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-sky-500">AMOR OS</h1>
           <p className="text-xs text-slate-400 mt-1 uppercase tracking-widest">Personal Life System</p>
         </div>
 
@@ -39,11 +39,11 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, user
               onClick={() => setActiveTab(item.id)}
               className={`w-full flex items-center space-x-3 space-x-reverse p-3 rounded-xl transition-all ${
                 activeTab === item.id 
-                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
+                  ? 'bg-sky-500/10 text-sky-600 border border-sky-500/20' 
                   : 'text-slate-400 hover:bg-slate-800 hover:text-white'
               }`}
             >
-              <span className={activeTab === item.id ? 'text-emerald-400' : 'text-slate-500'}>
+              <span className={activeTab === item.id ? 'text-sky-600' : 'text-slate-500'}>
                 {item.icon}
               </span>
               <span className="font-semibold text-sm">{item.label}</span>
@@ -60,7 +60,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, user
               </div>
             </div>
             <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
-              <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${(userStats.xp % 100)}%` }} />
+              <div className="h-full bg-sky-500 transition-all duration-500" style={{ width: `${(userStats.xp % 100)}%` }} />
             </div>
           </div>
         </div>
@@ -89,7 +89,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, user
                <Star size={16} className="text-yellow-400 fill-current" />
                <span className="text-sm font-bold text-slate-700">{userStats.xp}</span>
             </div>
-            <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center border-2 border-white shadow-md overflow-hidden">
+            <div className="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center border-2 border-white shadow-md overflow-hidden">
                 <img src="https://picsum.photos/100/100" alt="Amor" />
             </div>
           </div>
