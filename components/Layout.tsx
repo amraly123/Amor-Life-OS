@@ -11,17 +11,13 @@ interface LayoutProps {
   userStats: UserState;
   onSync: () => Promise<void>;
   onLogout: () => void;
+  isSyncing: boolean;
+  lastSyncTick: string | null;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, userStats, onSync, onLogout }) => {
-  const [syncing, setSyncing] = useState(false);
-  const [lastSync, setLastSync] = useState<string | null>(null);
-
+const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, userStats, onSync, onLogout, isSyncing, lastSyncTick }) => {
   const handleSync = async () => {
-    setSyncing(true);
     await onSync();
-    setSyncing(false);
-    setLastSync(new Date().toLocaleTimeString('ar-EG'));
   };
 
   return (
@@ -39,8 +35,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, user
               key={item.id}
               onClick={() => setActiveTab(item.id)}
               className={`w-full flex items-center space-x-3 space-x-reverse p-3 rounded-xl transition-all ${activeTab === item.id
-                  ? 'bg-sky-500/10 text-sky-600 border border-sky-500/20'
-                  : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                ? 'bg-sky-500/10 text-sky-600 border border-sky-500/20'
+                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
                 }`}
             >
               <span className={activeTab === item.id ? 'text-sky-600' : 'text-slate-500'}>
@@ -73,12 +69,12 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, user
             <div className="flex items-center gap-2 mt-1">
               <button
                 onClick={handleSync}
-                disabled={syncing}
-                className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tighter transition-colors ${syncing ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                disabled={isSyncing}
+                className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tighter transition-colors ${isSyncing ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
                   }`}
               >
-                {syncing ? <RefreshCw size={10} className="animate-spin" /> : lastSync ? <CheckCircle size={10} /> : <CloudSync size={10} />}
-                {syncing ? 'جاري المزامنة...' : lastSync ? `تم الحفظ ${lastSync}` : 'حفظ على هوستنجر'}
+                {isSyncing ? <RefreshCw size={10} className="animate-spin" /> : lastSyncTick ? <CheckCircle size={10} /> : <CloudSync size={10} />}
+                {isSyncing ? 'جاري المزامنة...' : lastSyncTick ? `تم الحفظ ${lastSyncTick}` : 'حفظ على هوستنجر'}
               </button>
               <p className="text-sm text-slate-500">منور يا عمرو..</p>
             </div>

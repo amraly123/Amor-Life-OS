@@ -19,6 +19,9 @@ const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return sessionStorage.getItem('amor_authenticated') === 'true';
   });
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
+
 
   const [userStats, setUserStats] = useState<UserState>(() => {
     const saved = localStorage.getItem('amor_user_stats');
@@ -72,12 +75,15 @@ const App: React.FC = () => {
     if (isInitialLoad) return;
 
     const timer = setTimeout(() => {
+      setIsSyncing(true);
       syncDataToHostinger({ goals, tasks, userStats }).then(result => {
+        setIsSyncing(false);
         if (result.status === 'success') {
+          setLastSyncTime(new Date().toLocaleTimeString('ar-EG'));
           console.log('✅ Auto-sync done!');
         }
       });
-    }, 2000); // بيستنى ٢ ثانية بعد آخر تغيير عشان ما يبعتش كل ثانية
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, [userStats, goals, tasks, isInitialLoad]);
@@ -122,6 +128,8 @@ const App: React.FC = () => {
       userStats={userStats}
       onSync={handleManualSync}
       onLogout={handleLogout}
+      isSyncing={isSyncing}
+      lastSyncTick={lastSyncTime}
     >
       {renderContent()}
     </Layout>
