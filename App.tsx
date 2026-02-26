@@ -67,6 +67,22 @@ const App: React.FC = () => {
     }
   }, [userStats, goals, tasks, isInitialLoad]);
 
+  // ===== AUTO-SYNC: يحفظ على الكلاود تلقائياً بعد أي تغيير (بعد ٢ ثانية) =====
+  useEffect(() => {
+    if (isInitialLoad) return;
+
+    const timer = setTimeout(() => {
+      syncDataToHostinger({ goals, tasks, userStats }).then(result => {
+        if (result.status === 'success') {
+          console.log('✅ Auto-sync done!');
+        }
+      });
+    }, 2000); // بيستنى ٢ ثانية بعد آخر تغيير عشان ما يبعتش كل ثانية
+
+    return () => clearTimeout(timer);
+  }, [userStats, goals, tasks, isInitialLoad]);
+  // ============================================================================
+
   const handleManualSync = async () => {
     const result = await syncDataToHostinger({ goals, tasks, userStats });
     if (result.status === 'error') {
