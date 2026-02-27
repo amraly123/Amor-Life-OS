@@ -137,6 +137,7 @@ const App: React.FC = () => {
       activeTab={activeTab}
       setActiveTab={setActiveTab}
       userStats={userStats}
+      setUserStats={setUserStats}
       onSync={handleManualSync}
       onLogout={handleLogout}
       isSyncing={isSyncing}

@@ -56,6 +56,9 @@ export interface UserState {
   level: number;
   mission: string;
   vision: string;
+  name?: string;
+  avatar?: string;
   lastReviewDate: string;
   weeklyVictory?: WeeklyVictory;
 }
+
