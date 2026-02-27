@@ -128,7 +128,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({ tasks, setTasks, goals }) => 
 
   // Subtask Progress Component
   const TaskProgress = ({ task }: { task: Task }) => {
-    if (task.subtasks.length === 0) return null;
+    if (!task.subtasks || task.subtasks.length === 0) return null;
     const completed = task.subtasks.filter(s => s.completed).length;
     const percent = Math.round((completed / task.subtasks.length) * 100);
 
@@ -177,7 +177,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({ tasks, setTasks, goals }) => 
                 className="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:translate-y-[-2px] hover:border-sky-200 transition-all cursor-grab active:cursor-grabbing group relative overflow-hidden"
               >
                 {/* Visual marker for subtasks */}
-                {task.subtasks.length > 0 && <div className="absolute top-0 right-0 w-12 h-12 bg-emerald-500/5 -rotate-45 translate-x-6 -translate-y-6"></div>}
+                {task.subtasks && task.subtasks.length > 0 && <div className="absolute top-0 right-0 w-12 h-12 bg-emerald-500/5 -rotate-45 translate-x-6 -translate-y-6"></div>}
 
                 <div className="flex items-start gap-4">
                   <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -211,7 +211,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({ tasks, setTasks, goals }) => 
                           <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">مراحل التنفيذ</span>
                         </div>
 
-                        {task.subtasks.map(sub => (
+                        {task.subtasks && task.subtasks.map(sub => (
                           <div key={sub.id} className="flex items-center gap-3 group/sub">
                             <button onClick={() => toggleSubTask(task.id, sub.id)} className="transition-transform active:scale-90">
                               {sub.completed ? <CheckCircle2 size={16} className="text-emerald-500" /> : <Circle size={16} className="text-slate-200 hover:text-sky-400" />}
@@ -338,7 +338,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({ tasks, setTasks, goals }) => 
                         <h4 className={`font-black text-xl mb-1 ${task.completed ? 'text-slate-300 line-through' : 'text-slate-800'}`}>{task.title}</h4>
                         <div className="flex items-center gap-4">
                           <span className="flex items-center gap-1.5 text-xs font-bold text-slate-400"><Clock size={14} /> {task.duration} دقيقة</span>
-                          {task.subtasks.length > 0 && <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-500"><Layers size={14} /> {task.subtasks.filter(s => s.completed).length}/{task.subtasks.length} مراحل</span>}
+                          {task.subtasks && task.subtasks.length > 0 && <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-500"><Layers size={14} /> {task.subtasks.filter(s => s.completed).length}/{task.subtasks.length} مراحل</span>}
                         </div>
                       </div>
                       <div className="flex gap-2">
@@ -351,7 +351,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({ tasks, setTasks, goals }) => 
                     {expandedTasks.includes(task.id) && (
                       <div className="mt-6 bg-slate-50/50 p-6 rounded-3xl border border-slate-100 animate-in fade-in slide-in-from-top-2">
                         <div className="space-y-4">
-                          {task.subtasks.map(sub => (
+                          {task.subtasks && task.subtasks.map(sub => (
                             <div key={sub.id} className="flex items-center gap-4 bg-white p-3 rounded-2xl shadow-sm border border-slate-100 group/sub">
                               <button onClick={() => toggleSubTask(task.id, sub.id)} className="transition-transform active:scale-90">
                                 {sub.completed ? <CheckCircle2 size={18} className="text-emerald-500" /> : <Circle size={18} className="text-slate-200 hover:text-sky-400" />}

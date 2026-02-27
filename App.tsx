@@ -43,7 +43,12 @@ const App: React.FC = () => {
 
   const [tasks, setTasks] = useState<Task[]>(() => {
     const saved = localStorage.getItem('amor_tasks');
-    return saved ? JSON.parse(saved) : INITIAL_TASKS;
+    const rawTasks = saved ? JSON.parse(saved) : INITIAL_TASKS;
+    // حماية: التأكد إن كل مهمة قديمة عندها مصفوفة مهام فرعية عشان الكود ما يضربش
+    return rawTasks.map((t: any) => ({
+      ...t,
+      subtasks: t.subtasks || []
+    }));
   });
 
   useEffect(() => {
@@ -54,7 +59,13 @@ const App: React.FC = () => {
         if (cloudData && cloudData.userStats) {
           setUserStats(cloudData.userStats);
           setGoals(cloudData.goals);
-          setTasks(cloudData.tasks);
+          // حماية البيانات بعد التحميل من الكلاود
+          if (cloudData.tasks) {
+            setTasks(cloudData.tasks.map((t: any) => ({
+              ...t,
+              subtasks: t.subtasks || []
+            })));
+          }
         }
       }
       setIsInitialLoad(false);
