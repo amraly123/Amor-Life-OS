@@ -27,10 +27,9 @@ interface TaskManagerProps {
   goals: Goal[];
 }
 
-// Sub-components moved outside for stability and focus persistence
-
+// Helper: Task Progress
 const TaskProgress = ({ task }: { task: Task }) => {
-  if (!task.subtasks || task.subtasks.length === 0) return null;
+  if (!task || !task.subtasks || task.subtasks.length === 0) return null;
   const completed = task.subtasks.filter(s => s.completed).length;
   const percent = Math.round((completed / task.subtasks.length) * 100);
 
@@ -47,6 +46,7 @@ const TaskProgress = ({ task }: { task: Task }) => {
   );
 };
 
+// Sub-component: Kanban Column
 interface KanbanColumnProps {
   title: string;
   status: 'todo' | 'in-progress' | 'done';
@@ -173,12 +173,13 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                 </div>
               </div>
               );
-          })}
+        })}
             </div>
     </div>
       );
 };
 
+      // Main Component
       const TaskManager: React.FC<TaskManagerProps> = ({tasks, setTasks, goals}) => {
   const [newTaskTitle, setNewTaskTitle] = useState('');
         const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
@@ -213,7 +214,8 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                 return {
                   ...t,
                   completed: newCompleted,
-                  status: newCompleted ? 'done' : (t.status === 'done' ? 'todo' : t.status)
+                  status: newCompleted ? 'done' : (t.status === 'done' ? 'todo' : t.status),
+                  subtasks: t.subtasks || []
                 };
               }
               return t;
@@ -239,7 +241,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
               if (t.id === taskId) {
                 return {
                   ...t,
-                  subtasks: t.subtasks.map(s => s.id === subId ? { ...s, title: newTitle } : s)
+                  subtasks: (t.subtasks || []).map(s => s.id === subId ? { ...s, title: newTitle } : s)
                 };
               }
               return t;
@@ -249,7 +251,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
   const toggleSubTask = (taskId: string, subId: string) => {
             setTasks(prev => prev.map(t => {
               if (t.id === taskId) {
-                const updatedSubs = t.subtasks.map(s => s.id === subId ? { ...s, completed: !s.completed } : s);
+                const updatedSubs = (t.subtasks || []).map(s => s.id === subId ? { ...s, completed: !s.completed } : s);
                 return { ...t, subtasks: updatedSubs };
               }
               return t;
@@ -258,7 +260,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
 
   const removeSubTask = (taskId: string, subId: string) => {
             setTasks(prev => prev.map(t =>
-              t.id === taskId ? { ...t, subtasks: t.subtasks.filter(s => s.id !== subId) } : t
+              t.id === taskId ? { ...t, subtasks: (t.subtasks || []).filter(s => s.id !== subId) } : t
             ));
   };
 
@@ -293,6 +295,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
 
           return (
           <div className="space-y-6">
+            {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-sky-500/5 rotate-45 translate-x-12 -translate-y-12"></div>
@@ -309,6 +312,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
               </div>
             </div>
 
+            {/* Input */}
             <div className="bg-slate-900 p-8 rounded-[3rem] shadow-2xl relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent"></div>
               <form onSubmit={addTask} className="relative z-10 flex flex-col md:flex-row gap-4">
@@ -326,6 +330,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
               </form>
             </div>
 
+            {/* View Switcher */}
             <div className="flex flex-col md:flex-row justify-between items-center gap-6">
               <div className="flex bg-white p-1.5 rounded-[1.5rem] border border-slate-100 shadow-sm ring-1 ring-slate-200/50">
                 <button
@@ -349,7 +354,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                   <button
                     key={f}
                     onClick={() => setFilter(f)}
-                    className={`px-6 py-3 rounded-2xl text-xs font-black transition-all ${filter === f ? 'bg-sky-50 text-sky-600' : 'text-slate-400 hover:bg-slate-50'
+                    className={`px-6 py-3 rounded-2xl text-xs font-black transition-all ${filter === f ? 'bg-sky-50 text-sky-600' : 'text-slate-400 hover:text-slate-600'
                       }`}
                   >
                     {f === 'all' ? 'الكل' : f === 'active' ? 'نشطة' : 'مكتملة'}
@@ -358,6 +363,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
               </div>
             </div>
 
+            {/* Main View */}
             {view === 'list' ? (
               <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden">
                 <div className="divide-y divide-slate-50">
