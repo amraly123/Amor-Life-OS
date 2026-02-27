@@ -18,8 +18,7 @@ import {
   ChevronUp,
   Layers,
   CheckCircle,
-  Edit2,
-  Check
+  Edit2
 } from 'lucide-react';
 
 interface TaskManagerProps {
@@ -28,7 +27,7 @@ interface TaskManagerProps {
   goals: Goal[];
 }
 
-// Moving sub-components OUTSIDE to prevent re-creation on every render (Fixes Focus Issue)
+// Sub-components moved outside for stability and focus persistence
 
 const TaskProgress = ({ task }: { task: Task }) => {
   if (!task.subtasks || task.subtasks.length === 0) return null;
@@ -176,9 +175,8 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
               );
           })}
             </div>
-      </div>
+    </div>
       );
-  };
 };
 
       const TaskManager: React.FC<TaskManagerProps> = ({tasks, setTasks, goals}) => {
@@ -351,7 +349,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                   <button
                     key={f}
                     onClick={() => setFilter(f)}
-                    className={`px-6 py-3 rounded-2xl text-xs font-black transition-all ${filter === f ? 'bg-sky-50 text-sky-600' : 'text-slate-400 hover:text-slate-600'
+                    className={`px-6 py-3 rounded-2xl text-xs font-black transition-all ${filter === f ? 'bg-sky-50 text-sky-600' : 'text-slate-400 hover:bg-slate-50'
                       }`}
                   >
                     {f === 'all' ? 'الكل' : f === 'active' ? 'نشطة' : 'مكتملة'}
