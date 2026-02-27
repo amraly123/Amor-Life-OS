@@ -41,6 +41,7 @@ export interface Task {
   completed: boolean;
   duration: number; // in minutes
   goalId?: string;
+  status?: 'todo' | 'in-progress' | 'done';
 }
 
 export interface UserState {
