@@ -33,6 +33,12 @@ export interface Idea {
   createdAt: string;
 }
 
+export interface SubTask {
+  id: string;
+  title: string;
+  completed: boolean;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -42,6 +48,7 @@ export interface Task {
   duration: number; // in minutes
   goalId?: string;
   status?: 'todo' | 'in-progress' | 'done';
+  subtasks: SubTask[];
 }
 
 export interface UserState {
