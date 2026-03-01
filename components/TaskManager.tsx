@@ -18,7 +18,12 @@ import {
   ChevronUp,
   Layers,
   CheckCircle,
-  Edit2
+  Edit2,
+  Edit3,
+  X,
+  Calendar,
+  Save,
+  Clock3
 } from 'lucide-react';
 
 interface TaskManagerProps {
@@ -68,12 +73,14 @@ interface ColumnProps {
   editingSubTask: { taskId: string, subId: string } | null;
   setEditingSubTask: React.Dispatch<React.SetStateAction<{ taskId: string, subId: string } | null>>;
   updateSubTaskTitle: (taskId: string, subId: string, title: string) => void;
+  onEditTask: (task: Task) => void;
 }
 
 const KanbanColumn: React.FC<ColumnProps> = ({
   title, status, colorClass, icon: Icon, tasks, expandedTasks, toggleExpand,
   onDragStart, onDragOver, onDrop, toggleSubTask, removeSubTask, addSubTask,
-  newSubTaskTitles, setNewSubTaskTitles, editingSubTask, setEditingSubTask, updateSubTaskTitle
+  newSubTaskTitles, setNewSubTaskTitles, editingSubTask, setEditingSubTask, updateSubTaskTitle,
+  onEditTask
 }) => {
   const columnTasks = tasks.filter(t => (t.status || (t.completed ? 'done' : 'todo')) === status);
 
@@ -112,9 +119,20 @@ const KanbanColumn: React.FC<ColumnProps> = ({
 
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start mb-1">
-                    <h4 className={`font-black text-sm leading-tight break-words ${task.completed ? 'text-slate-300 line-through' : 'text-slate-800'}`}>
-                      {task.title}
-                    </h4>
+                    <div className="flex items-center gap-1">
+                      <h4
+                        className={`font-black text-sm leading-tight break-words cursor-pointer hover:text-sky-600 transition-colors ${task.completed ? 'text-slate-300 line-through' : 'text-slate-800'}`}
+                        onClick={() => onEditTask(task)}
+                      >
+                        {task.title}
+                      </h4>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onEditTask(task); }}
+                        className="p-1 opacity-0 group-hover:opacity-100 text-slate-300 hover:text-sky-500 transition-all"
+                      >
+                        <Edit3 size={12} />
+                      </button>
+                    </div>
                     <button
                       onClick={(e) => { e.stopPropagation(); toggleExpand(task.id); }}
                       className={`p-1 rounded-md transition-colors ${isExpanded ? 'bg-sky-50 text-sky-600' : 'hover:bg-slate-50 text-slate-300'}`}
@@ -185,6 +203,116 @@ const KanbanColumn: React.FC<ColumnProps> = ({
 };
 
 // -------------------------------------------------------------------------
+// Task Edit Modal Component
+// -------------------------------------------------------------------------
+
+const TaskModal = ({ task, isOpen, onClose, onSave }: { task: Task, isOpen: boolean, onClose: () => void, onSave: (t: Task) => void }) => {
+  const [editedTask, setEditedTask] = useState<Task>({ ...task });
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose} />
+
+      <div className="relative bg-white w-full max-w-xl rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in duration-300 border border-slate-200">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-sky-500/5 rotate-45 translate-x-16 -translate-y-16" />
+
+        <div className="p-8">
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-2xl bg-sky-50 text-sky-600">
+                <Edit3 size={24} />
+              </div>
+              <div>
+                <h2 className="text-2xl font-black text-slate-800">تعديل المهمة</h2>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">تحرير المسار</p>
+              </div>
+            </div>
+            <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-xl text-slate-400 transition-colors">
+              <X size={24} />
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">اسم المهمة</label>
+              <input
+                type="text"
+                value={editedTask.title}
+                onChange={(e) => setEditedTask({ ...editedTask, title: e.target.value })}
+                className="w-full bg-slate-50 border-2 border-transparent focus:border-sky-500 rounded-2xl px-6 py-4 text-slate-800 font-bold outline-none transition-all shadow-inner"
+                placeholder="ماذا سننجز الآن؟"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">المدة (بالدقائق)</label>
+                <div className="relative">
+                  <Clock3 size={18} className="absolute left-4 top-1/2 -rotate-0 -translate-y-1/2 text-slate-300 pointer-events-none" />
+                  <input
+                    type="number"
+                    value={editedTask.duration}
+                    onChange={(e) => setEditedTask({ ...editedTask, duration: parseInt(e.target.value) || 0 })}
+                    className="w-full bg-slate-50 border-2 border-transparent focus:border-sky-500 rounded-2xl pl-12 pr-6 py-4 text-slate-800 font-bold outline-none transition-all shadow-inner"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">الحالة</label>
+                <select
+                  value={editedTask.status || 'todo'}
+                  onChange={(e) => {
+                    const status = e.target.value as any;
+                    setEditedTask({ ...editedTask, status, completed: status === 'done' });
+                  }}
+                  className="w-full bg-slate-50 border-2 border-transparent focus:border-sky-500 rounded-2xl px-6 py-4 text-slate-800 font-bold outline-none transition-all shadow-inner appearance-none cursor-pointer"
+                >
+                  <option value="todo">المطلوب</option>
+                  <option value="in-progress">قيد التنفيذ</option>
+                  <option value="done">تم الإنجاز</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-4 p-2">
+              <button
+                type="button"
+                onClick={() => setEditedTask({ ...editedTask, important: !editedTask.important })}
+                className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-xs transition-all ${editedTask.important ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20 shadow-xl scale-[1.05]' : 'bg-slate-50 text-slate-400 border border-slate-100'}`}
+              >
+                <Star size={18} fill={editedTask.important ? 'currentColor' : 'none'} />
+                مهمة مهمة
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditedTask({ ...editedTask, urgent: !editedTask.urgent })}
+                className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-xs transition-all ${editedTask.urgent ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20 shadow-xl scale-[1.05]' : 'bg-slate-50 text-slate-400 border border-slate-100'}`}
+              >
+                <AlertCircle size={18} />
+                مهمة عاجلة
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-10 flex gap-4">
+            <button
+              onClick={() => onSave(editedTask)}
+              className="flex-1 bg-slate-900 text-white py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-slate-900/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"
+            >
+              <Save size={20} />
+              حفظ التعديلات
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// -------------------------------------------------------------------------
 // Main TaskManager Component
 // -------------------------------------------------------------------------
 
@@ -195,6 +323,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({ tasks, setTasks, goals }) => 
   const [expandedTasks, setExpandedTasks] = useState<string[]>([]);
   const [newSubTaskTitles, setNewSubTaskTitles] = useState<Record<string, string>>({});
   const [editingSubTask, setEditingSubTask] = useState<{ taskId: string, subId: string } | null>(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const addTask = (e: React.FormEvent) => {
     e.preventDefault();
@@ -280,6 +409,11 @@ const TaskManager: React.FC<TaskManagerProps> = ({ tasks, setTasks, goals }) => 
 
   const deleteTask = (id: string) => {
     setTasks(prev => prev.filter(t => t.id !== id));
+  };
+
+  const updateTask = (updatedTask: Task) => {
+    setTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t));
+    setSelectedTask(null);
   };
 
   const toggleExpand = (id: string) => {
@@ -388,7 +522,20 @@ const TaskManager: React.FC<TaskManagerProps> = ({ tasks, setTasks, goals }) => 
                   <div className="flex-1">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h4 className={`font-black text-xl mb-1 ${task.completed ? 'text-slate-300 line-through' : 'text-slate-800'}`}>{task.title}</h4>
+                        <div className="flex items-center gap-3 mb-1">
+                          <h4
+                            className={`font-black text-xl cursor-pointer hover:text-sky-600 transition-colors ${task.completed ? 'text-slate-300 line-through' : 'text-slate-800'}`}
+                            onClick={() => setSelectedTask(task)}
+                          >
+                            {task.title}
+                          </h4>
+                          <button
+                            onClick={() => setSelectedTask(task)}
+                            className="p-1 opacity-0 group-hover:opacity-100 text-slate-300 hover:text-sky-500 transition-all"
+                          >
+                            <Edit3 size={16} />
+                          </button>
+                        </div>
                         <div className="flex items-center gap-4">
                           <span className="flex items-center gap-1.5 text-xs font-bold text-slate-400"><Clock size={14} /> {task.duration} دقيقة</span>
                           {task.subtasks && task.subtasks.length > 0 && <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-500"><Layers size={14} /> {task.subtasks.filter(s => s.completed).length}/{task.subtasks.length} مراحل</span>}
@@ -464,6 +611,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({ tasks, setTasks, goals }) => 
             toggleSubTask={toggleSubTask} removeSubTask={removeSubTask} addSubTask={addSubTask}
             newSubTaskTitles={newSubTaskTitles} setNewSubTaskTitles={setNewSubTaskTitles}
             editingSubTask={editingSubTask} setEditingSubTask={setEditingSubTask} updateSubTaskTitle={updateSubTaskTitle}
+            onEditTask={(task) => setSelectedTask(task)}
           />
           <KanbanColumn
             title="قيد التنفيذ" status="in-progress" colorClass="text-amber-500" icon={Clock}
@@ -472,6 +620,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({ tasks, setTasks, goals }) => 
             toggleSubTask={toggleSubTask} removeSubTask={removeSubTask} addSubTask={addSubTask}
             newSubTaskTitles={newSubTaskTitles} setNewSubTaskTitles={setNewSubTaskTitles}
             editingSubTask={editingSubTask} setEditingSubTask={setEditingSubTask} updateSubTaskTitle={updateSubTaskTitle}
+            onEditTask={(task) => setSelectedTask(task)}
           />
           <KanbanColumn
             title="تم الإنجاز" status="done" colorClass="text-emerald-500" icon={CheckCircle2}
@@ -480,8 +629,18 @@ const TaskManager: React.FC<TaskManagerProps> = ({ tasks, setTasks, goals }) => 
             toggleSubTask={toggleSubTask} removeSubTask={removeSubTask} addSubTask={addSubTask}
             newSubTaskTitles={newSubTaskTitles} setNewSubTaskTitles={setNewSubTaskTitles}
             editingSubTask={editingSubTask} setEditingSubTask={setEditingSubTask} updateSubTaskTitle={updateSubTaskTitle}
+            onEditTask={(task) => setSelectedTask(task)}
           />
         </div>
+      )}
+
+      {selectedTask && (
+        <TaskModal
+          task={selectedTask}
+          isOpen={!!selectedTask}
+          onClose={() => setSelectedTask(null)}
+          onSave={updateTask}
+        />
       )}
     </div>
   );
